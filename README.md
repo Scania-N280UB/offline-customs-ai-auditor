@@ -1,4 +1,4 @@
-# 🚀 离线关务单证风控引擎 (Offline Customs AI Auditor)
+<img width="2878" height="1688" alt="image" src="https://github.com/user-attachments/assets/e061e9fa-ab63-4f27-a5fc-1d672d9dac2a" /># 🚀 离线关务单证风控引擎 (Offline Customs AI Auditor)
 
 > **专为国际物流与关务风控设计的离线 AI 自动化数据核对系统**
 > 零数据上云 · 毫秒级懒加载响应 · 离线大模型抽取 · 视觉红黄绿控制塔看板
@@ -35,6 +35,11 @@
 * **黄色警告**：截关节点进入 24 小时临期预警。
 * **绿色正常**：数据高度一致且时间充裕。
 * 同步输出结构化 `.json` 文件供下游 API 调用。
+* <img width="2878" height="1688" alt="image" src="https://github.com/user-attachments/assets/1e289b0e-502b-4b4b-b444-e95cf2162a37" />
+<img width="2878" height="1799" alt="image" src="https://github.com/user-attachments/assets/d8c69807-a01c-4633-bcdb-f5c8367fbc25" />
+
+
+
 
 
 
