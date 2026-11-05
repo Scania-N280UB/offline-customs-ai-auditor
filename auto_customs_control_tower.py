@@ -75,7 +75,10 @@ def extract_data_with_ai(raw_text, filename):
        - 包含 Air Freight Departure Booking Confirmation、AFDBC、Flight 的识别为 "订舱确认书(Booking)"。
     2. Gross_Weight: 寻找 G.W., Gross Weight, WEIGHT 附近的最大浮点数 (如 1250.5)。
        - 【特别注意】：如果单据同时存在 N.W. (Net Weight) 和 G.W. (Gross Weight)，必须提取 G.W. (毛重)！绝对不要误提取 N.W.！找不到填 0.0。
-    3. Quantity: 寻找 QTY, PKGS, PACKAGES 附近的整数件数 (如 50)。找不到填 0。
+    3. Quantity: 寻找代表数量/件数的纯整数。
+       - 优先在 QTY, Quantity, Total Qty, PKGS, PACKAGES, CTNS, PCS, Units 附近寻找。
+       - 只要该数字代表了货物的件数、箱数或个数（如 50），不管是什么单据类型，都必须提取。
+       - 提取不到纯整数时填 0。
     4. Cut_Off_Time: 提取 截货/截关/ETD/SI Cut-off 时间，格式标准化为 "YYYY-MM-DD HH:MM"。若提取不到，填 "NONE"。
     
     必须且只能输出纯 JSON，格式如下：
@@ -100,7 +103,7 @@ def extract_data_with_ai(raw_text, filename):
 def process_and_cross_check(input_folder=".", output_folder=".", export_json=False):
     import pandas as pd  
     import openpyxl
-    from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+    from openpyxl.styles import PatternFill, Font, Alignment
 
     ensure_ollama_running()
 
@@ -123,14 +126,35 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
         extracted_results[file] = data_dict
         
     records_for_excel = []
-    weights_for_check = {}
-    qty_for_check = {}
     
     print("\n" + "="*60)
     print(" 🔍 AI 离线数据抓取完毕，开始多单交叉核对 (Cross-Check)...")
     print("="*60)
 
     now = datetime.now()
+    
+    # ---------------- 核心交叉比对逻辑 ----------------
+    CORE_SHIPPING_DOCS = ["运单(HAWB/MAWB)", "发票(Invoice)", "箱单(Packing List)"]
+    
+    core_weights = []
+    core_packages = []
+    
+    # 第一次遍历：仅收集核心运输单据的数据用于对碰
+    for data in extracted_results.values():
+        doc_type = data.get('Doc_Type', '未知')
+        if doc_type in CORE_SHIPPING_DOCS:
+            if float(data.get('Gross_Weight', 0.0)) > 0:
+                core_weights.append(float(data.get('Gross_Weight', 0.0)))
+            if int(data.get('Quantity', 0)) > 0:
+                core_packages.append(int(data.get('Quantity', 0)))
+
+    # 判断是否数据冲突 (利用 set 去重)
+    weight_mismatch = len(set(core_weights)) > 1 if core_weights else False
+    qty_mismatch = len(set(core_packages)) > 1 if core_packages else False
+    has_data_error = weight_mismatch or qty_mismatch
+    # ----------------------------------------------------
+
+    # 第二次遍历：生成格式化记录并渲染最终状态
     for filename, data in extracted_results.items():
         doc_type = data.get('Doc_Type', '未知')
         w = float(data.get('Gross_Weight', 0.0))
@@ -148,6 +172,19 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
 
         print(f"📄 文件: {filename:<32} | 类型: {doc_type:<15} | 毛重: {w} KG | 件数: {q} | DDL: {cut_time_str}")
         
+        # 确定写入 JSON 和 Excel 的最终核对状态
+        final_status = "待判定"
+        if doc_type in CORE_SHIPPING_DOCS:
+            if has_data_error:
+                diff_reasons = []
+                if weight_mismatch: diff_reasons.append("毛重不符")
+                if qty_mismatch: diff_reasons.append("件数不符")
+                final_status = f"❌ 预警（{','.join(diff_reasons)}）"
+            else:
+                final_status = "✅ 通过"
+        elif doc_type == "贸易合同(Contract)":
+            final_status = "不适用（非装运单据）"
+        
         records_for_excel.append({
             "原文件名": filename,
             "识别单据类型": doc_type,
@@ -155,16 +192,10 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
             "提取件数": q,
             "截关时间(DDL)": cut_time_str,
             "剩余倒计时(Hrs)": time_to_ddl_hrs,
-            "核对状态": "待判定"
+            "核对状态": final_status
         })
-        
-        if w > 0: weights_for_check[doc_type] = w
-        if q > 0: qty_for_check[doc_type] = q
 
-    weight_mismatch = len(set(weights_for_check.values())) > 1 if len(weights_for_check) > 1 else False
-    qty_mismatch = len(set(qty_for_check.values())) > 1 if len(qty_for_check) > 1 else False
-    has_data_error = weight_mismatch or qty_mismatch
-
+    # ------------- 渲染 Excel 看板 -------------
     excel_name = os.path.join(output_folder, "【控制塔看板】单证交叉核对及运力预警.xlsx")
     df = pd.DataFrame(records_for_excel)
 
@@ -187,16 +218,19 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
             cell.font = header_font
             cell.alignment = center_align
 
-        for i, row in enumerate(ws.iter_rows(min_row=2, max_row=len(records_for_excel)+1, min_col=1, max_col=7)):
+        for row in ws.iter_rows(min_row=2, max_row=len(records_for_excel)+1, min_col=1, max_col=7):
             for cell in row:
                 cell.alignment = center_align
+            
+            # 使用最新写入的核对状态判断底色
             status_cell = row[6]
+            status_val = str(status_cell.value)
             ddl_val = row[5].value
 
-            if has_data_error:
+            # 颜色渲染优先级：先看数据是否冲突，再看时间是否超时，最后看是否正常
+            if "预警" in status_val or has_data_error:
                 status_cell.fill = danger_fill
                 status_cell.font = danger_font
-                status_cell.value = "❌ 高危：件重尺数据冲突"
             elif isinstance(ddl_val, (int, float)):
                 if ddl_val < 0:
                     status_cell.fill = danger_fill
@@ -209,12 +243,12 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
                 else:
                     status_cell.fill = safe_fill
                     status_cell.font = safe_font
-                    status_cell.value = "✅ 正常：单据一致且时间充裕"
+            elif "通过" in status_val or "正常" in status_val:
+                status_cell.fill = safe_fill
+                status_cell.font = safe_font
             else:
-                if not has_data_error:
-                    status_cell.fill = safe_fill
-                    status_cell.font = safe_font
-                    status_cell.value = "✅ 正常：单据一致"
+                 # 比如贸易合同的不适用状态，留白
+                pass
 
         for col in ws.columns:
             max_len = max(len(str(cell.value or '')) for cell in col)
@@ -224,6 +258,7 @@ def process_and_cross_check(input_folder=".", output_folder=".", export_json=Fal
     print("\n" + "="*60)
     print(f"🎉 自动化完成！红黄绿控制塔看板已保存至: {excel_name}")
     
+    # ------------- 导出更新状态后的 JSON -------------
     if export_json:
         json_name = os.path.join(output_folder, "audit_result.json")
         with open(json_name, 'w', encoding='utf-8') as f:
@@ -259,13 +294,12 @@ def launch_gui():
         btn_start.config(state="disabled", text="⏳ 正在风控核对中...")
         root.update()
         
-        # 【关键修改】：使用 os.path.dirname(folder) 获取上一级目录 (notebooks 目录)
         output_dir = os.path.join(os.path.dirname(folder), "Result")
         
         try:
             process_and_cross_check(
                 input_folder=folder, 
-                output_folder=output_dir,  # 👈 结果将直接输出到 notebooks\Result
+                output_folder=output_dir,  
                 export_json=export_json_var.get()
             )
             messagebox.showinfo("成功", f"🎉 单证风控已完成！\n看板及结果已存至：\n{output_dir}")
@@ -273,6 +307,7 @@ def launch_gui():
             messagebox.showerror("异常", f"运行出错：{str(e)}")
         finally:
             btn_start.config(state="normal", text="🚀 开始单证交叉核对")
+
     tk.Label(root, text="离线关务单证风控引擎", font=("Microsoft YaHei", 14, "bold")).pack(pady=15)
 
     frame_path = tk.Frame(root)
@@ -289,7 +324,6 @@ def launch_gui():
 
 # ================= 入口路由 (统一判断运行模式) =================
 if __name__ == "__main__":
-    # 只要带有任何参数 (比如 --help，或者 -i folder)，就走终端命令行模式
     if len(sys.argv) > 1:
         parser = argparse.ArgumentParser(description="🚀 离线关务单证风控引擎 (Offline Customs AI Auditor)")
         parser.add_argument("-i", "--input", default=".", help="指定包含待核对 PDF 的文件夹路径 (默认: 当前目录)")
@@ -299,6 +333,5 @@ if __name__ == "__main__":
         args = parser.parse_args()
         process_and_cross_check(input_folder=args.input, output_folder=args.output, export_json=args.json)
     
-    # 没有任何参数（鼠标直接双击运行），就弹出 GUI 图形界面
     else:
         launch_gui()
