@@ -1,7 +1,4 @@
 # 🚀 Offline Customs AI Auditor (离线关务单证风控引擎)
-<img width="2878" height="1688" alt="屏幕截图 2026-11-05 111924" src="https://github.com/user-attachments/assets/5b77d093-8fc0-4d90-82bc-3d1ba32fac49" />
-
-<img width="2878" height="1799" alt="屏幕截图 2026-11-05 112010" src="https://github.com/user-attachments/assets/de06e3b0-3e67-4c30-90c9-11b2def7e1d5" />
 
 [ 🇨🇳 点击跳转至中文文档 / Click here for Chinese ](#chinese-version) | [ 🇬🇧 Click here for English README ](#english-version)
 
@@ -147,6 +144,9 @@ This project is open-sourced under the [MIT License](https://www.google.com/sear
 
 <br>
 <br>
+<img width="2878" height="1688" alt="屏幕截图 2026-11-05 111924" src="https://github.com/user-attachments/assets/672edbc6-6ad5-4807-899c-dade4cab0efc" />
+<img width="2878" height="1799" alt="屏幕截图 2026-11-05 112010" src="https://github.com/user-attachments/assets/4b057ca2-1821-4cc8-8c3c-897a0526fd87" />
+
 
 ---
 
