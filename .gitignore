@@ -1,0 +1,22 @@
+# 忽略程序运行生成的输出结果文件夹
+Result/
+audit_result.json
+*.xlsx
+
+# 忽略 Python 编译与缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略系统自动生成的垃圾文件
+.DS_Store
+Thumbs.db
+
+# 忽略 IDE 的配置文件
+.vscode/
+.idea/
+
+# 忽略真实业务单证 (仅允许上传以 sample 结尾的演示单证)
+PDF_test_folder/*.pdf
+!PDF_test_folder/*sample.pdf
