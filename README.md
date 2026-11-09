@@ -215,4 +215,4 @@ python auto_customs_control_tower_v2.6.py -i ./PDF_test_folder -o ./Result --jso
 * **v2.6 (Current)**：重构为原生内存直连与 `AsyncIO` 协程并发；引入 `RuleEngine` 单据类型卡关过滤（自动豁免 HAWB 运费模式）；优化 Ollama 确定性采样与 Token 截断控制。
 * **v2.5**：集成海关官方税则 CSV 自动 ETL 进 SQLite 离线数据库；实现生物医药“Q类检疫条件”自动对撞预警。
 * **v2.1 - v2.4**：引入多行明细逻辑防碰撞校验（`qty × unit_price = total_price`）；完成 Streamlit 网页可视化看板建设。
-* **v2.0**：项目首次发布，实现基于 RapidOCR + Ollama(Qwen2.5) 的离线多单据件重尺基础交叉核对。
+* **v1.0**：项目首次发布，实现基于 RapidOCR + Ollama(Qwen2.5) 的离线多单据件重尺基础交叉核对。
