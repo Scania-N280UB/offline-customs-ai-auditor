@@ -1,8 +1,8 @@
 # 🚀 Offline Customs & Capacity Control Tower (离线关务与运力风控引擎 v2.6.2)
 
-[ 🇨🇳 点击跳转至中文文档 / Click here for Chinese ](#user-content-chinese-version) | [ 🇬🇧 Click here for English README ](#user-content-english-version)
+[ 🇨🇳 点击跳转至中文文档 / Click here for Chinese ](#中文说明) | [ 🇬🇧 Click here for English README ](#english)
 
-## 🇬🇧 English
+## English
 
 > **An Enterprise-grade, 100% Offline AI Risk Control Engine for Bio-Pharma Supply Chain, Customs Auditing, and ERP Integration.**
 > Zero cloud data upload · Async LLM Extraction · SQLite HS Tariff Reconciliation · Decoupled Streamlit Web UI · Context-Aware Rule Engine
@@ -110,7 +110,9 @@ python auto_customs_control_tower_v2_6_2.py -i ./PDF_test_folder -o ./Result --j
 **All demonstration documents included in this project are synthetic, anonymized, and created strictly for testing purposes.**
 This project is open-sourced under the [GNU AGPLv3 License](LICENSE).
 
-## 🇨🇳 中文说明
+---
+
+## 中文说明
 
 > **专为生物医药进出口、关务合规及冷链运力追踪设计的 100% 离线 AI 自动化风控引擎**
 > 零数据上云 · 异步大模型并发抓取 · SQLite税则库对撞 · 前后端解耦Web端 · 上下文感知逻辑引擎
@@ -220,6 +222,8 @@ python auto_customs_control_tower_v2_6_2.py -i ./PDF_test_folder -o ./Result --j
 ### ⚖️ 开源许可证
 
 本项目采用 [GNU AGPL-3.0](LICENSE) 协议开源。
+
+---
 
 ## 📅 版本演进历史 (Changelog)
 
