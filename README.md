@@ -1,6 +1,6 @@
 # 🚀 Offline Customs & Capacity Control Tower (离线关务与运力风控引擎 v2.6.2)
 
-[ 🇨🇳 点击跳转至中文文档 / Click here for Chinese ](#chinese-version) | [ 🇬🇧 Click here for English README ](#english-version)
+[ 🇨🇳 点击跳转至中文文档 / Click here for Chinese ](#中文说明) | [ 🇬🇧 Click here for English README ](#english)
 
 ## 🇬🇧 English
 
