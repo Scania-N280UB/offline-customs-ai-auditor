@@ -110,6 +110,11 @@ python auto_customs_control_tower_v2_6_2.py -i ./PDF_test_folder -o ./Result --j
 **All demonstration documents included in this project are synthetic, anonymized, and created strictly for testing purposes.**
 This project is open-sourced under the [GNU AGPLv3 License](LICENSE).
 
+### 🤝 Acknowledgments
+
+* **Domain Architecture & Business Logic**: Independently conceived, designed, and validated by the repository author based on frontline customs brokerage and cold-chain logistics compliance practices, including context-aware exemption rules, tariff reconciliation workflows, and deterministic anti-hallucination guardrails.
+* **Engineering & Tooling**: Built upon open-source ecosystems including `Qwen2.5`, `Ollama`, `RapidOCR`, and `Streamlit`. AI coding assistants (such as Google Gemini) were utilized during development to accelerate Python syntax refactoring, asynchronous concurrency boilerplate, and bilingual documentation formatting.
+
 ---
 
 ## 中文说明
@@ -223,7 +228,10 @@ python auto_customs_control_tower_v2_6_2.py -i ./PDF_test_folder -o ./Result --j
 
 本项目采用 [GNU AGPL-3.0](LICENSE) 协议开源。
 
----
+### 🤝 致谢与开发说明 (Acknowledgments)
+
+* **业务架构与核心规则**：本项目的业务痛点抽象、系统总体架构、上下文单据豁免逻辑（RuleEngine）、本地税则对撞流程以及大模型防幻觉风控策略，均由作者结合一线报关及冷链供应链合规实操经验独立设计与测试验证。
+* **开源生态与辅助工具**：项目底层依托 `Qwen2.5`、`Ollama`、`RapidOCR` 及 `Streamlit` 等优秀开源项目构建；开发过程中借助了 AI 编程助手（如 Google Gemini）进行 Python 语法重构、异步并发框架提效及双语技术文档排版。
 
 ## 📅 版本演进历史 (Changelog)
 
